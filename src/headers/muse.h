@@ -33,6 +33,8 @@ public:
     Texture2D getTexture();
     std::string getName();
 
+    bool bufferReady();
+
 private:
 
     Muse();

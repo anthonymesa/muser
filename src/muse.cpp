@@ -18,6 +18,7 @@ void Muse::announce(std::string _text) {
 }
 
 void Muse::rasterizeBuffer() {
+    this->audio_buffer.push_back(1);
 }
 
 void Muse::exportImage(std::string _filename) {
@@ -42,4 +43,8 @@ Texture2D Muse::getTexture() {
 
 std::vector<unsigned int> Muse::getAudioBuffer() {
     return this->audio_buffer;
+}
+
+bool Muse::bufferReady() {
+    return !this->audio_buffer.empty();
 }

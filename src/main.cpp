@@ -139,6 +139,8 @@ int main(void)
 
             EndMode3D();
 
+            GuiEnable();
+
             // raygui: controls drawing
             //----------------------------------------------------------------------------------
             if (import_windowActive)
@@ -150,17 +152,22 @@ int main(void)
                 if (GuiTextBox((Rectangle){ anchor01.x + 8, anchor01.y + 108, 408, 24 }, import_texture_inputText, 128, import_texture_inputEditMode)) import_texture_inputEditMode = !import_texture_inputEditMode;
                 if (GuiButton((Rectangle){ anchor01.x + 424, anchor01.y + 108, 80, 24 }, import_button_submitText)) ImportButtonSubmit(); 
             }
+
             GuiStatusBar((Rectangle){ 0, 497, 800, 20 }, status_barText);
-            if (GuiButton((Rectangle){ 8, 464, 56, 24 }, button_importText)) ButtonImport(); 
-            if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+            if (GuiButton((Rectangle){ 8, 464, 56, 24 }, button_importText)) ButtonImport();
+            if(muse_map.empty()) GuiDisable(); 
             if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
-            GuiDisable();
+            if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, Button_convertText)) ButtonConvert();
+            if(muse_map.size() <= 1) GuiDisable();
+            if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+            if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
+            if(muse_map.size() <= 1) GuiEnable();
+            if(!current_muse->second.bufferReady()) GuiDisable();
             if (GuiButton((Rectangle){ anchor02.x + 120, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
             if (GuiButton((Rectangle){ anchor02.x + 216, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
-            GuiEnable();
-            if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
             if (GuiButton((Rectangle){ anchor02.x + 312, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay(); 
-            if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, Button_convertText)) ButtonConvert(); 
+            if(!current_muse->second.bufferReady()) GuiEnable();
+
             //----------------------------------------------------------------------------------
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -248,6 +255,6 @@ static void ButtonPlay()
 
 static void ButtonConvert()
 {
-    // TODO: Implement control logic
+    current_muse->second.rasterizeBuffer();
 }
 
