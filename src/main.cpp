@@ -50,6 +50,7 @@ static void ButtonExportPpm();
 static void ButtonExportWav();
 static void ButonRight();
 static void ButtonPlay();
+static void ButtonConvert();
 
 // standalone functions should be pascal case
 
@@ -91,6 +92,7 @@ const char *button_export_ppmText = "EXPORT PPM";
 const char *button_export_wavText = "EXPORT WAV";
 const char *buton_rightText = ">>";
 const char *button_playText = "PLAY";
+const char *Button_convertText = "RASTERIZE";
 
 Vector2 anchor01 = { 152, 208 };
 Vector2 anchor02 = { 232, 464 };
@@ -149,13 +151,16 @@ int main(void)
                 if (GuiButton((Rectangle){ anchor01.x + 424, anchor01.y + 108, 80, 24 }, import_button_submitText)) ImportButtonSubmit(); 
             }
             GuiStatusBar((Rectangle){ 0, 497, 800, 20 }, status_barText);
-            if (GuiButton((Rectangle){ anchor02.x + -224, anchor02.y + 0, 56, 24 }, button_importText)) ButtonImport(); 
-            if (GuiButton((Rectangle){ anchor02.x + 0, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
-            if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
-            if (GuiButton((Rectangle){ anchor02.x + 104, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
-            if (GuiButton((Rectangle){ anchor02.x + 200, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
-            if (GuiButton((Rectangle){ anchor02.x + 352, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
-            if (GuiButton((Rectangle){ anchor02.x + 296, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay(); 
+            if (GuiButton((Rectangle){ 8, 464, 56, 24 }, button_importText)) ButtonImport(); 
+            if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+            if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
+            GuiDisable();
+            if (GuiButton((Rectangle){ anchor02.x + 120, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
+            if (GuiButton((Rectangle){ anchor02.x + 216, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
+            GuiEnable();
+            if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
+            if (GuiButton((Rectangle){ anchor02.x + 312, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay(); 
+            if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, Button_convertText)) ButtonConvert(); 
             //----------------------------------------------------------------------------------
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -237,6 +242,11 @@ static void ButonRight()
 }
 
 static void ButtonPlay()
+{
+    // TODO: Implement control logic
+}
+
+static void ButtonConvert()
 {
     // TODO: Implement control logic
 }
