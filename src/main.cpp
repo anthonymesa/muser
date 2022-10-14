@@ -34,9 +34,28 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <functional>
+#include <ctime>
 
-std::map<std::string, Muse> muse_map;
-std::map<std::string, Muse>::iterator current_muse;
+typedef enum {
+    STATE_RASTERIZED = 0,
+    STATE_NOT_RASTERIZED,
+} UiRasterState;
+
+typedef enum {
+    STATE_NN = 0,
+    STATE_LN,
+    STATE_NR,
+    STATE_LR,
+} UiArrowState;
+
+typedef enum {
+    STATE_EMPTY = 0,
+    STATE_NOT_EMPTY
+} UiEmptyState;
+
+std::map<size_t, Muse> muse_map;
+std::map<size_t, Muse>::iterator current_muse;
 
 //----------------------------------------------------------------------------------
 // Controls Functions Declaration
@@ -52,13 +71,24 @@ static void ButtonPlay();
 static void ButtonConvert();
 static void ButtonMuffin();
 static void ButtonCastle();
+static UiRasterState getUiRasterState();
+static UiEmptyState getUiEmptyState();
+static UiArrowState getUiArrowState();
 
 // standalone functions should be pascal case
 
 void LoadMuse(std::string _obj, std::string _tex) {
+
+    time_t now = time(0);
+    char* dt = ctime(&now);
+    std::hash<std::string> hasher;
+    size_t hash = hasher(std::string(dt));
+
+    std::cout << std::to_string(hash) << std::endl;
+
     muse_map.insert(
-        std::pair<std::string, Muse>(
-            std::to_string(muse_map.size()),
+        std::pair<size_t, Muse>(
+            hash,
             Muse(muse_map.size(), _obj, _tex)
         )
     );
@@ -143,13 +173,14 @@ int main(void)
 
             EndMode3D();
 
-            GuiEnable();
-
             // raygui: controls drawing
             //----------------------------------------------------------------------------------
 
             const bool disable_buffer_controls = muse_map.empty() || !(current_muse->second.bufferReady());
             const bool map_will_be_empty = muse_map.size() <= 1;
+
+            const bool no_left = current_muse == muse_map.begin();
+            const bool no_right = !muse_map.empty() && (std::next(current_muse, 1) == muse_map.end());
 
             if (import_windowActive)
             {
@@ -167,22 +198,59 @@ int main(void)
 
             GuiStatusBar((Rectangle){ 0, 497, 800, 20 }, status_barText);
             if (GuiButton((Rectangle){ 8, 464, 56, 24 }, button_importText)) ButtonImport();
-
-            if(muse_map.empty()) GuiDisable(); 
-                if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
-                if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, button_convertText)) ButtonConvert();
-
-                if(map_will_be_empty) GuiDisable();
+            
+            switch(getUiArrowState()){
+                case UiArrowState::STATE_NN:
+                    GuiDisable();
                     if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
                     if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
-                if(map_will_be_empty) GuiEnable();
-                
-                if(disable_buffer_controls) GuiDisable();
-                    // std::cout << current_muse->second.getAudioBuffer().size() << std::endl;
+                    GuiEnable();
+                    break;
+                case UiArrowState::STATE_LN:
+                    if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+                    GuiDisable();
+                    if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
+                    GuiEnable();
+                    break;
+                case UiArrowState::STATE_NR:
+                    GuiDisable();
+                    if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+                    GuiEnable();
+                    if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
+                    break;
+                case UiArrowState::STATE_LR:
+                    if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
+                    break;
+            }
+
+            switch(getUiEmptyState()){
+                case UiEmptyState::STATE_EMPTY:
+                    GuiDisable();
+                    if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, button_convertText)) ButtonConvert();
+                    GuiEnable();
+                    break;
+                case UiEmptyState::STATE_NOT_EMPTY:
+                    if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, button_convertText)) ButtonConvert();
+                    break;
+            }
+
+            switch(getUiRasterState()){
+                case UiRasterState::STATE_RASTERIZED:
+                    if (GuiButton((Rectangle){ anchor02.x + 120, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 216, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 312, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay();
+                    break;
+                case UiRasterState::STATE_NOT_RASTERIZED:
+                    GuiDisable();
                     if (GuiButton((Rectangle){ anchor02.x + 120, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
                     if (GuiButton((Rectangle){ anchor02.x + 216, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
                     if (GuiButton((Rectangle){ anchor02.x + 312, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay(); 
-                if(disable_buffer_controls) GuiEnable();
+                    GuiEnable();
+                    break;
+            }
 
             //----------------------------------------------------------------------------------
         EndDrawing();
@@ -193,6 +261,34 @@ int main(void)
     CloseWindow();   // Close window and OpenGL context
 
     return 0;
+}
+
+static UiArrowState getUiArrowState() {
+    if (muse_map.size() <= 1) {
+        return UiArrowState::STATE_NN;
+    } else if (current_muse == muse_map.begin()) {
+        return UiArrowState::STATE_NR;
+    } else if (std::next(current_muse, 1) == muse_map.end()) {
+        return UiArrowState::STATE_LN;
+    } else {
+        return UiArrowState::STATE_LR;
+    }
+}
+
+static UiEmptyState getUiEmptyState() {
+    if (muse_map.empty()) {
+        return UiEmptyState::STATE_EMPTY;
+    } else {
+        return UiEmptyState::STATE_NOT_EMPTY;
+    }
+}
+
+static UiRasterState getUiRasterState() {
+    if (current_muse->second.getAudioBuffer().size() > 0) {
+        return UiRasterState::STATE_RASTERIZED;
+    } else {
+        return UiRasterState::STATE_NOT_RASTERIZED;
+    }
 }
 
 //------------------------------------------------------------------------------------
@@ -214,7 +310,8 @@ static void ImportButtonSubmit()
 
     // assuming the above went well ->
 
-    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    // current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    current_muse = muse_map.begin();
     strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
     import_windowActive = false;
 }
@@ -237,7 +334,7 @@ static void ButtonDelete()
             muse_map.erase(current_muse);
             current_muse = muse_map.end();
         } else {
-            std::map<std::string, Muse>::iterator temp_it = std::next(current_muse, 1);
+            std::map<size_t, Muse>::iterator temp_it = std::next(current_muse, 1);
             if (temp_it == muse_map.end()) temp_it = std::prev(current_muse, 1);
             muse_map.erase(current_muse);
             current_muse = temp_it;
@@ -290,9 +387,11 @@ static void ButtonMuffin()
 
     // assuming the above went well ->
 
-    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    // current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    current_muse = muse_map.begin();
     strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
     import_windowActive = false;
+    std::cout << muse_map.size() << std::endl;
 }
 
 static void ButtonCastle()
@@ -309,7 +408,9 @@ static void ButtonCastle()
 
     // assuming the above went well ->
 
-    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    // current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    current_muse = muse_map.begin();
     strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
     import_windowActive = false;
+    std::cout << muse_map.size() << std::endl;
 }
