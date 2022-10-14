@@ -64,8 +64,7 @@ private:
 
     // Methods
     void initMinMaxValues();
-    float Muse::normalizeVector(std::tuple<float, float, float> vertex);
-    float Muse::calculateRealMagnitude(float _temp_raw_mag);
+    float calculateRealMagnitude(float _temp_raw_mag);
     void setAudioBuffer(std::vector<unsigned int> _audio_buffer);
     void announce(std::string _text);
     void populateFaceRasterData(std::vector<unsigned int> &face, int face_index);
@@ -84,7 +83,7 @@ private:
     void orderFace(std::vector<unsigned int> &face_data);
     void rasterizeFace(std::vector<unsigned int> &face);
     void rasterizeTop(Point &L, Point &M, Point &H);
-    void RasterizeBottom(Point &L, Point &M, Point &H);
+    void rasterizeBottom(Point &L, Point &M, Point &H);
     float slope(Point &_u, Point &_v);
     float yIntercept(float _m, Point &_u);
     float xIntercept(int &_y, float &_b, float &_m);

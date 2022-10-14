@@ -370,6 +370,7 @@ static void ButtonPlay()
 static void ButtonConvert()
 {
     current_muse->second.rasterizeBuffer();
+    strcpy(status_barText, "Finished rasterizing topology.");
 }
 
 static void ButtonMuffin()
