@@ -7,7 +7,7 @@
 
 typedef std::tuple<float, float, float> Point;
 
-#define BUFFER_WIDTH = 1000;
+#define BUFFER_WIDTH 1000
 
 // Use classes when:
 
@@ -54,11 +54,18 @@ private:
     Texture2D model_texture;
     std::vector<unsigned int> audio_buffer;
 
+    float min_distance_from_origin;
+    float max_distance_from_origin;
+    float min_max_distance_difference;
+
     // Getters/Setters
     void setName(std::string _name);
     void setModel(Model _model);
 
     // Methods
+    void initMinMaxValues();
+    float Muse::normalizeVector(std::tuple<float, float, float> vertex);
+    float Muse::calculateRealMagnitude(float _temp_raw_mag);
     void setAudioBuffer(std::vector<unsigned int> _audio_buffer);
     void announce(std::string _text);
     void populateFaceRasterData(std::vector<unsigned int> &face, int face_index);
