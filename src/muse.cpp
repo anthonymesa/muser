@@ -1,5 +1,6 @@
 
 #include "muse.h"
+#include "AudioFile.h"
 #include <iostream>
 
 Muse::Muse(int _count, std::string _obj_file_path, std::string _tex_file_path) {

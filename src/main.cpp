@@ -37,7 +37,6 @@
 
 std::map<std::string, Muse> muse_map;
 std::map<std::string, Muse>::iterator current_muse;
-Muse *muse_queue[3];
 
 //----------------------------------------------------------------------------------
 // Controls Functions Declaration
@@ -51,6 +50,7 @@ static void ButtonExportWav();
 static void ButonRight();
 static void ButtonPlay();
 static void ButtonConvert();
+static void ButtonMuffin();
 
 // standalone functions should be pascal case
 
@@ -81,6 +81,7 @@ const int screenWidth = 800;
 const int screenHeight = 513;
 
 char status_barText[128] = "";
+
 const char *button_importText = "IMPORT";
 const char *import_windowText = "IMPORT";
 const char *import_model_labelText = "MODEL FILE";
@@ -92,7 +93,8 @@ const char *button_export_ppmText = "EXPORT PPM";
 const char *button_export_wavText = "EXPORT WAV";
 const char *buton_rightText = ">>";
 const char *button_playText = "PLAY";
-const char *Button_convertText = "RASTERIZE";
+const char *button_convertText = "RASTERIZE";
+const char *button_muffinText = "MUFFIN";
 
 Vector2 anchor01 = { 152, 208 };
 Vector2 anchor02 = { 232, 464 };
@@ -143,10 +145,15 @@ int main(void)
 
             // raygui: controls drawing
             //----------------------------------------------------------------------------------
+
+            const bool disable_buffer_controls = muse_map.empty() || !(current_muse->second.bufferReady());
+            const bool map_will_be_empty = muse_map.size() <= 1;
+
             if (import_windowActive)
             {
                 import_windowActive = !GuiWindowBox((Rectangle){ anchor01.x + 0, anchor01.y + 0, 512, 140 }, import_windowText);
                 GuiLabel((Rectangle){ anchor01.x + 8, anchor01.y + 24, 120, 24 }, import_model_labelText);
+                if(GuiButton((Rectangle){anchor01.x + 424, anchor01.y + 24, 80, 24 }, button_muffinText)) ButtonMuffin();
                 if (GuiTextBox((Rectangle){ anchor01.x + 8, anchor01.y + 48, 408, 24 }, import_model_inputText, 128, import_model_inputEditMode)) import_model_inputEditMode = !import_model_inputEditMode;
                 GuiLabel((Rectangle){ anchor01.x + 8, anchor01.y + 78, 120, 24 }, import_texture_labelText);
                 if (GuiTextBox((Rectangle){ anchor01.x + 8, anchor01.y + 108, 408, 24 }, import_texture_inputText, 128, import_texture_inputEditMode)) import_texture_inputEditMode = !import_texture_inputEditMode;
@@ -155,18 +162,22 @@ int main(void)
 
             GuiStatusBar((Rectangle){ 0, 497, 800, 20 }, status_barText);
             if (GuiButton((Rectangle){ 8, 464, 56, 24 }, button_importText)) ButtonImport();
+
             if(muse_map.empty()) GuiDisable(); 
-            if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
-            if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, Button_convertText)) ButtonConvert();
-            if(muse_map.size() <= 1) GuiDisable();
-            if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
-            if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
-            if(muse_map.size() <= 1) GuiEnable();
-            if(!current_muse->second.bufferReady()) GuiDisable();
-            if (GuiButton((Rectangle){ anchor02.x + 120, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
-            if (GuiButton((Rectangle){ anchor02.x + 216, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
-            if (GuiButton((Rectangle){ anchor02.x + 312, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay(); 
-            if(!current_muse->second.bufferReady()) GuiEnable();
+                if (GuiButton((Rectangle){ anchor02.x + -40, anchor02.y + 0, 64, 24 }, button_deleteText)) ButtonDelete(); 
+                if (GuiButton((Rectangle){ anchor02.x + 32, anchor02.y + 0, 80, 24 }, button_convertText)) ButtonConvert();
+
+                if(map_will_be_empty) GuiDisable();
+                    if (GuiButton((Rectangle){ anchor02.x + -72, anchor02.y + 0, 24, 24 }, button_leftText)) ButtonLeft(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 368, anchor02.y + 0, 24, 24 }, buton_rightText)) ButonRight(); 
+                if(map_will_be_empty) GuiEnable();
+                
+                if(disable_buffer_controls) GuiDisable();
+                    // std::cout << current_muse->second.getAudioBuffer().size() << std::endl;
+                    if (GuiButton((Rectangle){ anchor02.x + 120, anchor02.y + 0, 88, 24 }, button_export_ppmText)) ButtonExportPpm(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 216, anchor02.y + 0, 88, 24 }, button_export_wavText)) ButtonExportWav(); 
+                    if (GuiButton((Rectangle){ anchor02.x + 312, anchor02.y + 0, 48, 24 }, button_playText)) ButtonPlay(); 
+                if(disable_buffer_controls) GuiEnable();
 
             //----------------------------------------------------------------------------------
         EndDrawing();
@@ -196,9 +207,10 @@ static void ImportButtonSubmit()
         import_texture_inputText
     );
 
-    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    // assuming the above went well ->
 
-    strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". Check console for any errors.").c_str());
+    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
     import_windowActive = false;
 }
 
@@ -221,6 +233,7 @@ static void ButtonDelete()
             current_muse = muse_map.end();
         } else {
             std::map<std::string, Muse>::iterator temp_it = std::next(current_muse, 1);
+            if (temp_it == muse_map.end()) temp_it = std::prev(current_muse, 1);
             muse_map.erase(current_muse);
             current_muse = temp_it;
         }
@@ -258,3 +271,21 @@ static void ButtonConvert()
     current_muse->second.rasterizeBuffer();
 }
 
+static void ButtonMuffin()
+{
+    char default_model[128] = "resources/models/muffin/muffin.obj";
+    char default_texture[128] = "resources/models/muffin/muffin.png";
+
+    strcpy(status_barText, ("Importing model \"" + std::string(default_model) + "\"...").c_str());
+
+    LoadMuse(
+        default_model,
+        default_texture
+    );
+
+    // assuming the above went well ->
+
+    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
+    import_windowActive = false;
+}

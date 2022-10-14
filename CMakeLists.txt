@@ -21,7 +21,7 @@ project(${APPLICATION_NAME})
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   # Append these flags to the already existing CXX flags.
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -lpthread -pthread -Wall")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -lpthread -pthread -Wall -g")
 endif()
 
 #==========================================
@@ -86,7 +86,6 @@ if(UNIX AND NOT APPLE)
   )
   file(GLOB_RECURSE RAYLIB_H 
     "${CMAKE_SOURCE_DIR}/lib/raylib/include/*.h" 
-    "${CMAKE_SOURCE_DIR}/lib/raylib/include/*.hpp"
   )
   LIST_ITEMS("${RAYLIB_H}" "[Raylib Headers]")
   target_sources(${APPLICATION_NAME} PRIVATE ${RAYLIB_H})
@@ -98,9 +97,18 @@ if(UNIX AND NOT APPLE)
   )
   file(GLOB_RECURSE RAYGUI_H 
     "${CMAKE_SOURCE_DIR}/lib/raygui/include/*.h" 
-    "${CMAKE_SOURCE_DIR}/lib/raygui/include/*.hpp"
   )
   LIST_ITEMS("${RAYGUI_H}" "[Raygui Headers]")
   target_sources(${APPLICATION_NAME} PRIVATE ${RAYGUI_H})
+
+  # AudioFile
+  include_directories(${APPLICATION_NAME} 
+  ${CMAKE_SOURCE_DIR}/lib/AudioFile
+  )
+  file(GLOB_RECURSE AUDIOFILE_H 
+    "${CMAKE_SOURCE_DIR}/lib/AudioFile/*.h" 
+  )
+  LIST_ITEMS("${AUDIOFILE_H}" "[AudioFile Headers]")
+  target_sources(${APPLICATION_NAME} PRIVATE ${AUDIOFILE_H})
 
 endif()
