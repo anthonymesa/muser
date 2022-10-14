@@ -310,7 +310,6 @@ static void ImportButtonSubmit()
 
     // assuming the above went well ->
 
-    // current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
     current_muse = muse_map.begin();
     strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
     import_windowActive = false;

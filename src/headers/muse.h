@@ -7,7 +7,7 @@
 
 typedef std::tuple<float, float, float> Point;
 
-static const int width = 100;
+#define BUFFER_WIDTH = 1000;
 
 // Use classes when:
 
