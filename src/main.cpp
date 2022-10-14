@@ -51,6 +51,7 @@ static void ButonRight();
 static void ButtonPlay();
 static void ButtonConvert();
 static void ButtonMuffin();
+static void ButtonCastle();
 
 // standalone functions should be pascal case
 
@@ -95,6 +96,7 @@ const char *buton_rightText = ">>";
 const char *button_playText = "PLAY";
 const char *button_convertText = "RASTERIZE";
 const char *button_muffinText = "MUFFIN";
+const char *button_castleText = "CASTLE";
 
 Vector2 anchor01 = { 152, 208 };
 Vector2 anchor02 = { 232, 464 };
@@ -153,7 +155,10 @@ int main(void)
             {
                 import_windowActive = !GuiWindowBox((Rectangle){ anchor01.x + 0, anchor01.y + 0, 512, 140 }, import_windowText);
                 GuiLabel((Rectangle){ anchor01.x + 8, anchor01.y + 24, 120, 24 }, import_model_labelText);
-                if(GuiButton((Rectangle){anchor01.x + 424, anchor01.y + 24, 80, 24 }, button_muffinText)) ButtonMuffin();
+
+                if(GuiButton((Rectangle){anchor01.x + 434, anchor01.y + 30, 60, 18 }, button_muffinText)) ButtonMuffin();
+                if(GuiButton((Rectangle){anchor01.x + 434, anchor01.y + 54, 60, 18 }, button_castleText)) ButtonCastle();
+
                 if (GuiTextBox((Rectangle){ anchor01.x + 8, anchor01.y + 48, 408, 24 }, import_model_inputText, 128, import_model_inputEditMode)) import_model_inputEditMode = !import_model_inputEditMode;
                 GuiLabel((Rectangle){ anchor01.x + 8, anchor01.y + 78, 120, 24 }, import_texture_labelText);
                 if (GuiTextBox((Rectangle){ anchor01.x + 8, anchor01.y + 108, 408, 24 }, import_texture_inputText, 128, import_texture_inputEditMode)) import_texture_inputEditMode = !import_texture_inputEditMode;
@@ -275,6 +280,25 @@ static void ButtonMuffin()
 {
     char default_model[128] = "resources/models/muffin/muffin.obj";
     char default_texture[128] = "resources/models/muffin/muffin.png";
+
+    strcpy(status_barText, ("Importing model \"" + std::string(default_model) + "\"...").c_str());
+
+    LoadMuse(
+        default_model,
+        default_texture
+    );
+
+    // assuming the above went well ->
+
+    current_muse = muse_map.find(std::to_string(muse_map.size() - 1));
+    strcpy(status_barText, ("Loaded model \"" + current_muse->second.getName() + "\". " + std::to_string(current_muse->second.getModel().meshes[0].vertexCount) + " Vertices, " + std::to_string(current_muse->second.getModel().meshes[0].triangleCount) + " Texels. Check console for any errors.").c_str());
+    import_windowActive = false;
+}
+
+static void ButtonCastle()
+{
+    char default_model[128] = "resources/models/castle/castle.obj";
+    char default_texture[128] = "resources/models/castle/castle_diffuse.png";
 
     strcpy(status_barText, ("Importing model \"" + std::string(default_model) + "\"...").c_str());
 
