@@ -450,6 +450,8 @@ void Muse::exportAudio(std::string _filename)
 
     std::string file_path = "./" + _filename + ".wav";
     audioFile.save(file_path, AudioFileFormat::Wave);
+
+    this->wav_ready = true;
 }
 
 double Muse::Frequency(const int &row)
@@ -528,4 +530,9 @@ std::vector<unsigned int> Muse::getAudioBuffer()
 bool Muse::bufferReady()
 {
     return this->buffer_rasterized;
+}
+
+bool Muse::wavReady()
+{
+    return this->wav_ready;
 }

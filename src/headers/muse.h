@@ -40,9 +40,11 @@ public:
     void exportImage(std::string _filename);
     void exportAudio(std::string _filename);
     bool bufferReady();
+    bool wavReady();
     bool rasterize();
     void executePartialRender(int _current_thread, int _thread_faces_limit, int _face_index);
     std::vector<unsigned int> getAudioBuffer();
+
 
 private:
     // Constructor
@@ -62,7 +64,8 @@ private:
     float max_distance_from_origin;
     float min_max_distance_difference;
     bool buffer_rasterized;
-
+    bool wav_ready;
+    
     // Getters/Setters
     void setName(std::string _name);
     void setModel(Model _model);
