@@ -55,5 +55,6 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp"
-    }
+    },
+    "esbonio.sphinx.confDir": ""
 }
