@@ -176,12 +176,6 @@ int main(void)
             // raygui: controls drawing
             //----------------------------------------------------------------------------------
 
-            const bool disable_buffer_controls = muse_map.empty() || !(current_muse->second.bufferReady());
-            const bool map_will_be_empty = muse_map.size() <= 1;
-
-            const bool no_left = current_muse == muse_map.begin();
-            const bool no_right = !muse_map.empty() && (std::next(current_muse, 1) == muse_map.end());
-
             if (import_windowActive)
             {
                 import_windowActive = !GuiWindowBox((Rectangle){ anchor01.x + 0, anchor01.y + 0, 512, 140 }, import_windowText);
@@ -284,7 +278,7 @@ static UiEmptyState getUiEmptyState() {
 }
 
 static UiRasterState getUiRasterState() {
-    if (current_muse->second.getAudioBuffer().size() > 0) {
+    if (current_muse->second.bufferReady()) {
         return UiRasterState::STATE_RASTERIZED;
     } else {
         return UiRasterState::STATE_NOT_RASTERIZED;
@@ -342,14 +336,21 @@ static void ButtonDelete()
     }
 }
 
+// currently this is happening in the ui thread, but this needs to happen elsewhere.
 static void ButtonExportPpm()
 {
-    // TODO: Implement control logic
+    std::string model_name = current_muse->second.getName();
+    strcpy(status_barText, ("Exporting " + model_name + " to image...").c_str());
+    current_muse->second.exportImage(model_name);
+    strcpy(status_barText, ("Exported model \"" + model_name + "\" to " + model_name + ".ppm.").c_str());
 }
 
 static void ButtonExportWav()
 {
-    // TODO: Implement control logic
+    std::string model_name = current_muse->second.getName();
+    strcpy(status_barText, ("Exporting " + model_name + " to audio...").c_str());
+    current_muse->second.exportAudio(model_name);
+    strcpy(status_barText, ("Exported model \"" + model_name + "\" to " + model_name + ".wav.").c_str());
 }
 
 static void ButonRight()
@@ -369,8 +370,9 @@ static void ButtonPlay()
 
 static void ButtonConvert()
 {
+    strcpy(status_barText, ("Rasterizing \"" + current_muse->second.getName() + "\"...").c_str());
     current_muse->second.rasterizeBuffer();
-    strcpy(status_barText, "Finished rasterizing topology.");
+    strcpy(status_barText, ("Finished rasterizing \"" + current_muse->second.getName() + "\".").c_str());
 }
 
 static void ButtonMuffin()

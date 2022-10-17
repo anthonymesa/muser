@@ -54,9 +54,14 @@ private:
     Texture2D model_texture;
     std::vector<unsigned int> audio_buffer;
 
+    const int MAX_HERTZ = 20000;
+    const int MIN_HERTZ = 1000;
+    const double DECIBLE_SCALAR = 12.0;
+
     float min_distance_from_origin;
     float max_distance_from_origin;
     float min_max_distance_difference;
+    bool buffer_rasterized;
 
     // Getters/Setters
     void setName(std::string _name);
@@ -79,7 +84,7 @@ private:
     unsigned int getFaceZ3(int face_index);
     unsigned int getCoordinateValue(int point_index, int dimension_index, int face_index);
     unsigned int getColorValue(int point_index, int face_index);
-    float normalizeVector(std::tuple<float, float, float> vertex);
+    float getVertexDistance(std::tuple<float, float, float> vertex);
     void orderFace(std::vector<unsigned int> &face_data);
     void rasterizeFace(std::vector<unsigned int> &face);
     void rasterizeTop(Point &L, Point &M, Point &H);
@@ -90,4 +95,7 @@ private:
     float interpolate(float _curr_x, float _curr_y, Point &_a_bound, Point &_b_bound);
     float distance2d(float _x1, float _x2, float _y1, float _y2);
     void rasterizeLine(int omega, Point &A, Point &B);
+    double Frequency(const int &row);
+    double Amplitude(const int &row, const int &sample_index, int numSamplesPerChannel);
+    double GetHertzRange();
 };
