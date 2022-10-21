@@ -289,6 +289,16 @@ int main(void)
                 ButtonPlay();
         }
 
+        DrawRectangle( 10, 10, 300, 113, LIGHTGRAY);
+        DrawRectangleLines( 10, 10, 300, 113, DARKGRAY);
+
+        DrawText("Camera Controls:", 15,15, 10, DARKGRAY);
+        DrawText("- Mouse Wheel to Zoom in-out", 20, 40, 10, DARKGRAY);
+        DrawText("- Mouse Wheel Pressed to Pan", 20, 60, 10, DARKGRAY);
+        DrawText("- Shift + Alt + Mouse Wheel Pressed to Rotate", 20, 80, 10, DARKGRAY);
+        DrawText("- Alt + Ctrl + Mouse Wheel Pressed for Smooth Zoom", 20, 100, 10, DARKGRAY);
+
+
         //----------------------------------------------------------------------------------
         EndDrawing();
         //----------------------------------------------------------------------------------
