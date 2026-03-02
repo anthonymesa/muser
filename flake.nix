@@ -16,13 +16,35 @@
       devShells.${system}.default = pkgs.mkShell {
         packages = with pkgs; [
           pkg-config
-          cmake
+
           xmake
+
+          raylib
+          glfw
+          xorg.libXrandr
+          xorg.libXinerama
+          xorg.libXcursor
+          xorg.libXi
+          libGL
+
           valgrind 
           gdb
         ];
 
-        shellHook = ''
+
+        shellHook = 
+        let 
+          libraries = with pkgs; lib.makeLibraryPath [ 
+            glfw 
+            libGL
+            xorg.libXrandr
+            xorg.libXinerama
+            xorg.libXcursor
+            xorg.libXi
+          ];
+        in ''
+          export LD_LIBRARY_PATH="${libraries}:$LD_LIBRARY_PATH"
+
           function build() {
             currDir="$(pwd)";
             cd "${projectDir}/build"; 
