@@ -17,6 +17,7 @@
         packages = with pkgs; [
           pkg-config
           cmake
+          xmake
           valgrind 
           gdb
         ];
